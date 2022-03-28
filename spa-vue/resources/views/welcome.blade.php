@@ -15,7 +15,6 @@
     <product-component></product-component>
 </div>
 
-
 <script src="{{ mix('js/app.js') }}"></script>
 </body>
 </html>
