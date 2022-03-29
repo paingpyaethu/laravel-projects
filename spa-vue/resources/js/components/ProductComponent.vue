@@ -10,17 +10,17 @@
             </button>
          </div>
          <div class="col-12 col-md-3">
-            <div class="input-group">
-               <input type="text" class="form-control" placeholder="Search">
-               <button class="btn btn-primary">
-                  <i class="fas fa-search"></i>
-               </button>
-            </div>
+            <form @submit.prevent="show">
+               <div class="input-group">
+                  <input v-model="search" type="text" class="form-control" placeholder="Search">
+                  <button type="submit" class="btn btn-primary">
+                     <i class="fas fa-search"></i>
+                  </button>
+               </div>
+            </form>
          </div>
       </div>
       <!-- Search End -->
-
-
 
       <div class="row">
          <!-- Create -->
@@ -28,18 +28,26 @@
             <div class="card shadow-sm">
                <h5 class="card-header fw-bold">{{ isEditMode ? 'Edit' : 'Create' }}</h5>
                <div class="card-body">
-                  <div class="form-floating mb-3">
-                     <input v-model="product.name" type="text" class="form-control" id="Name" placeholder="Product Name">
-                     <label for="Name">Name</label>
-                  </div>
-                  <div class="form-floating mb-3">
-                     <input v-model="product.price" type="number" class="form-control" id="Product Price" placeholder="Password">
-                     <label for="Product Price">Price</label>
-                  </div>
-                  <button class="btn btn-primary" @click="isEditMode ? update() : store()">
-                     <i class="fas fa-save"></i>
-                     Submit
-                  </button>
+
+                  <form @submit.prevent="isEditMode ? update() : store()" @keydown="product.onKeydown($event)">
+
+                     <AlertError :form="product" :message="message" />
+
+                     <div class="form-floating mb-3">
+                        <input v-model="product.name" type="text" class="form-control" name="name" id="Name" placeholder="Product Name">
+                        <label for="Name">Name</label>
+                        <HasError :form="product" field="name" />
+                     </div>
+                     <div class="form-floating mb-3">
+                        <input v-model="product.price" type="number" class="form-control" name="price" id="Product Price" placeholder="Password">
+                        <label for="Product Price">Price</label>
+                        <HasError :form="product" field="price" />
+                     </div>
+                     <Button :form="product" class="btn btn-primary">
+                        <i class="fas fa-save"></i>
+                        Submit
+                     </Button>
+                  </form>
                </div>
             </div>
          </div>
@@ -58,7 +66,7 @@
                   </tr>
                   </thead>
                   <tbody>
-                  <tr v-for="product in products.data" :key="product.id">
+                  <tr v-for="product in products" :key="product.id">
                      <td>{{ product.id }}</td>
                      <td>{{ product.name }}</td>
                      <td>{{ product.price }}</td>
@@ -77,7 +85,7 @@
                </table>
             </div>
 
-            <pagination :data="products" @pagination-change-page="show"></pagination>
+<!--            <pagination :data="products" @pagination-change-page="show"></pagination>-->
          </div>
          <!-- Show Products End -->
 
@@ -86,64 +94,92 @@
 </template>
 
 <script>
+
+   import Form from 'vform'
+   import { Button, HasError, AlertError } from 'vform/src/components/bootstrap5'
+
    export default {
       name: "ProductComponent",
+
+      components: {
+         Button, HasError, AlertError
+      },
       data() {
          return {
             isEditMode: false,
-            products: {},
-            product: {
+            search: '',
+            products: [],
+            product: new Form({
                id: '',
                name: '',
                price: ''
-            }
+            }),
+            message: ''
          }
       },
       methods: {
-         show(page = 1) {
-            axios.get('/api/products?page=' + page)
+         show() {
+            axios.get(`/api/products`)
                .then( response => {
                this.products = response.data;
             });
          },
          create() {
             this.isEditMode = false;
-            this.product.id = '';
-            this.product.name = '';
-            this.product.price = '';
+            this.product.clear();
+            this.product.reset();
          },
          store() {
-            axios.post('/api/products', this.product)
+            this.product.post('/api/products')
             .then( () => {
                this.show();
-               this.product = { id: '', name: '', price: ''};
-               // this.product.id = '';
-               // this.product.name = '';
-               // this.product.price = '';
+               this.product.reset();
+               Toast.fire({
+                  icon: 'success',
+                  title: 'Product Created successfully'
+               })
+
+            }).catch(error => {
+               this.message = error.response.data.message;
             })
          },
          edit(product) {
             this.isEditMode = true;
-            this.product.id = product.id;
-            this.product.name = product.name;
-            this.product.price = product.price;
+            this.product.clear();
+            this.product.fill(product);
          },
          update() {
-            axios.put(`/api/products/${this.product.id}`, this.product)
+            this.product.put(`/api/products/${this.product.id}`)
             .then(() => {
                this.show();
-               this.product.id = '';
-               this.product.name = '';
-               this.product.price = '';
+               this.product.reset();
+               Toast.fire({
+                  icon: 'success',
+                  title: 'Product updated successfully'
+               })
             })
          },
          destroy(id) {
-            if (!confirm('Are you sure to delete?'))
-            {
-               return;
-            }
-            axios.delete(`/api/products/${id}`)
-            .then(() => this.show());
+            Swal.fire({
+               title: 'Are you sure?',
+               icon: 'warning',
+               showCancelButton: true,
+               confirmButtonColor: '#3085d6',
+               cancelButtonColor: '#d33',
+               confirmButtonText: 'Delete'
+            }).then((result) => {
+               if (result.isConfirmed) {
+                  axios.delete(`/api/products/${id}`).then(() => {
+                     this.show();
+                     Swal.fire({title:'Deleted!', icon:'success'});
+                     Toast.fire({
+                        icon: 'success',
+                        title: 'Product Deleted successfully'
+                     })
+                  });
+
+               }
+            });
          }
       },
       created() {

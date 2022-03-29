@@ -31,7 +31,7 @@ class ProductStoreRequest extends FormRequest
 
    public function messages() {
       return [
-         'name.required'=>'နာမည်သည် ထည့်သွင်းရန် လိုအပ်သည်',
+         'name.required'=>'နာမည်ထည့်သွင်းရန် လိုအပ်သည်',
          'price.required'=>'တန်ဖိုးထည့်သွင်းရန် လိုအပ်သည်',
          'name.string'=>'နာမည်သည် စာသားဖြစ်ရန် လိုအပ်သည်',
          'price.numeric'=>'တန်ဖိုးသည် ကိန်းဂဏန်းဖြစ်ရန် လိုအပ်သည်'
