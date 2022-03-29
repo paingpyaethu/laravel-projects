@@ -26,6 +26,7 @@
     },
     "dependencies": {
         "sweetalert2": "^11.4.8",
-        "vform": "^2.1.2"
+        "vform": "^2.1.2",
+        "vue-progressbar": "^0.7.5"
     }
 }

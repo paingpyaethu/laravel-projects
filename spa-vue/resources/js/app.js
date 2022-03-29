@@ -3,6 +3,29 @@ window.Vue = require('vue').default;
 
 import Swal from 'sweetalert2';
 
+import Vue from 'vue'
+import VueProgressBar from 'vue-progressbar'
+// import App from './App'
+
+const options = {
+    color: '#10d704',
+    failedColor: '#874b4b',
+    thickness: '2px',
+    transition: {
+        speed: '0.5s',
+        opacity: '0.6s',
+        termination: 300
+    },
+    autoRevert: true,
+    location: 'top',
+    inverse: false
+}
+
+Vue.use(VueProgressBar, options)
+
+// new Vue({
+//     ...App
+// }).$mount('#app')
 // const files = require.context('./', true, /\.vue$/i)
 // files.keys().map(key => Vue.component(key.split('/').pop().split('.')[0], files(key).default))
 

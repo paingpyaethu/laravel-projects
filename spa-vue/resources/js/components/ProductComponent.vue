@@ -119,10 +119,14 @@
       },
       methods: {
          show() {
+            this.$Progress.start();
             axios.get(`/api/products`)
                .then( response => {
                this.products = response.data;
-            });
+                  this.$Progress.finish();
+               }).catch(() => {
+               this.$Progress.fail();
+            })
          },
          create() {
             this.isEditMode = false;
@@ -177,7 +181,6 @@
                         title: 'Product Deleted successfully'
                      })
                   });
-
                }
             });
          }
