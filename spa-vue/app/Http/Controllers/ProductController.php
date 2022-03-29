@@ -10,7 +10,9 @@ class ProductController extends Controller
 {
     public function index()
     {
-        return Product::orderBy('id', 'desc')->paginate(5);
+        return Product::when(request('search'), function ($query){
+           $query->where('name', 'like', '%'.request('search').'%');
+        })->orderBy('id', 'desc')->get();
     }
 
     public function store(ProductStoreRequest $request)
